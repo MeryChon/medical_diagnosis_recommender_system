@@ -4,7 +4,9 @@ from rest_framework.response import Response
 
 from aggregations.models import AggregationType
 from dempster_shafer_structure.utils.dsbs import DSBSHandler
+from utility_matrix.models import UtilityMatrixData
 from utility_matrix.serializers import UtilityMatrixDataSerializer
+from utility_matrix.utils.fuzzy_numbers.serializers import OrderedAlternativeSerializer
 
 DIAGNOSES = [
     {
@@ -67,13 +69,49 @@ FOCAL_ELEMENTS = {
     }
 }
 
+# TODO weights should be arbitrary and normalization should be implemented
+WEIGHT_VECTORS = {
+    'B1': [0.6, 0.4],
+    'B2': [0.7, 0.2, 0.1],
+    'B3': [0.4, 0.5],
+    'B4': [0.3, 0.1],
+    'B5': [0.4, 0.1, 0.2],
+}
+
+
+# WEIGHT_VECTORS = {
+#     'B1': {
+#         'Irritability': 0.6,
+#         'Lack of Appetite': 0.4,
+#     },
+#     'B2': {
+#         'Irritability': 0.7,
+#         'Lack of Appetite': 0.2,
+#         'Visual Hallucinations': 0.1,
+#     },
+#     'B3': {
+#         'Lack of Appetite': 0.4,
+#         'Difficulty Moving': 5,
+#     },
+#     'B4': {
+#         "Difficulty Moving": 0.3,
+#         "Visual Hallucinations": 0.1
+#     },
+#     'B5': {
+#         "Difficulty Moving": 0.4,
+#         "Visual Hallucinations": 0.1,
+#         "Auditory Hallucinations": 0.2
+#     }
+# }
+
 
 @api_view(['GET'])
 def get_dempster_shafer_structure_data(request):
     data = {
         'diagnoses': DIAGNOSES,
         'symptoms': SYMPTOMS,
-        'focal_elements': FOCAL_ELEMENTS
+        'focal_elements': FOCAL_ELEMENTS,
+        'weight_vectors': WEIGHT_VECTORS
     }
 
     return Response(status=200, data=data)
@@ -93,17 +131,20 @@ def run_decision_making_process(request):
         'expert_user': request.user.pk
     })
     serializer.is_valid(raise_exception=True)
-    utility_matrix = serializer.save()
+    utility_matrix = serializer.save()  # type: UtilityMatrixData
+    print(utility_matrix.discrimination_qrang_matrix_json)
 
     dsbs_handler = DSBSHandler(utility_matrix_data=utility_matrix,
-                               focal_elements=FOCAL_ELEMENTS)
+                               focal_elements=FOCAL_ELEMENTS,
+                               focal_element_weight_vectors=WEIGHT_VECTORS)
 
     results = {}
-    for aggregation_type in AggregationType.choices:
+    for aggregation_type in [AggregationType.weighted_average]:
         dsbs_handler.run(aggregation_type)
         results[aggregation_type] = {
-            "ordered_alternatives": dsbs_handler.ordered_alternatives,
-            "optimal_alternative": dsbs_handler.optimal_alternative
+            "ordered_alternatives": OrderedAlternativeSerializer(dsbs_handler.ordered_alternatives,
+                                                                 many=True).to_representation(),
+            "optimal_alternative": OrderedAlternativeSerializer(dsbs_handler.optimal_alternative).to_representation()
         }
 
     return Response(status=200, data={"results": results})
