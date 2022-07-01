@@ -7,11 +7,14 @@ class QROFN(FuzzyNumber):
     _score = None
     _accuracy = None
 
-    def __init__(self, m=None, n=None, q=None):
+    def __init__(self, m=0, n=1, q=None):
         self.validate(m, n, q)
         self._m = self.to_decimal(m)
         self._n = self.to_decimal(n)
-        self._q = self.to_decimal(q) if q else QROFN.calculate_rung(self._m, self._n)
+        if m and n:
+            self._q = self.to_decimal(q) if q else QROFN.calculate_rung(self._m, self._n)
+        else:
+            self._q = 1
         self._score = self.calculate_score()
         self._accuracy = self.calculate_accuracy()
         super(QROFN, self).__init__(m, n, q)
