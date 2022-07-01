@@ -7,6 +7,7 @@ class UtilityMatrixData(models.Model):
     expert_raw_data_json = models.JSONField(null=False)
     discrimination_qrang_matrix_json = models.JSONField(null=True, blank=True)
     utility_collections_matrix = models.JSONField(null=True, blank=True)
+    matrix_rung = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

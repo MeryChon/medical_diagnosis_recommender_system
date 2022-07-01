@@ -1,6 +1,6 @@
 import decimal
 
-from fuzzy_numbers.interface import FuzzyNumber
+from utility_matrix.utils.fuzzy_numbers.interface import FuzzyNumber
 
 
 class QROFN(FuzzyNumber):
