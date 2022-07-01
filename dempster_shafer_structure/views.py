@@ -139,7 +139,7 @@ def run_decision_making_process(request):
                                focal_element_weight_vectors=WEIGHT_VECTORS)
 
     results = {}
-    for aggregation_type in [AggregationType.weighted_average]:
+    for aggregation_type in AggregationType.choices:
         dsbs_handler.run(aggregation_type)
         results[aggregation_type] = {
             "ordered_alternatives": OrderedAlternativeSerializer(dsbs_handler.ordered_alternatives,

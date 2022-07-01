@@ -7,7 +7,7 @@ class QROFN(FuzzyNumber):
     _score = None
     _accuracy = None
 
-    def __init__(self, m=0, n=1, q=None):
+    def __init__(self, m=decimal.Decimal(0), n=decimal.Decimal(1), q=None):
         self.validate(m, n, q)
         self._m = self.to_decimal(m)
         self._n = self.to_decimal(n)
