@@ -1,9 +1,12 @@
 from pandas import DataFrame
 
+from utility_matrix.utils.fuzzy_numbers.qrofn import QROFN
+
 
 class QRungUtilityMatrixGenerator:
     frequency_matrix = None  # type: DataFrame
     large_ratio_fn = None  # function
+    matrix_rung = None
 
     def __init__(self, frequency_matrix, large_ratio_fn=None):
         self.frequency_matrix = DataFrame.from_dict(frequency_matrix, orient="index")
@@ -50,8 +53,19 @@ class QRungUtilityMatrixGenerator:
             for item_index, frequency in row.iteritems():
                 positive_discrimination = self._calculate_positive_discrimination(item_index, row)
                 negative_discrimination = self._calculate_negative_discrimination(item_index, row)
-                data[row_index][item_index] = (positive_discrimination, negative_discrimination)
+                data[row_index][item_index] = QROFN(positive_discrimination, negative_discrimination)
 
         result = DataFrame(index=self.frequency_matrix.index,
                            columns=self.frequency_matrix.columns).from_dict(data, orient='index')
-        return result
+        matrix_rung = self.calculate_rung(result)
+        return result, matrix_rung
+
+    @staticmethod
+    def calculate_rung(orthopair_matrix):
+        max_rung = 0
+        for row_index, row in orthopair_matrix.iterrows():
+            for item_index, number in row.iteritems():
+                if number.q > max_rung:
+                    max_rung = number.q
+
+        return max_rung

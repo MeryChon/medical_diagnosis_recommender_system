@@ -15,8 +15,11 @@ class UtilityCollectionsMatrixGenerator(object):
         for alternative_key, states_data in self.utility_matrix.items():
             alternative_collection = {}
             for focal_element_key, focal_element_data in self.focal_elements.items():
-                states = focal_element_data.get("states")
+                states = focal_element_data.get("symptoms")
                 for state_key in states:
+                    qrofn_dict = self.utility_matrix[alternative_key][state_key]
                     alternative_collection.setdefault(focal_element_key, []).append(
-                        QROFN(*self.utility_matrix[alternative_key][state_key]))
+                        QROFN(m=qrofn_dict.get('m'), n=qrofn_dict.get('n'), q=qrofn_dict.get('q')))
             utility_collections_matrix[alternative_key] = alternative_collection
+
+        return utility_collections_matrix
