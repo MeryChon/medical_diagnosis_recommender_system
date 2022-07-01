@@ -1,4 +1,5 @@
 from aggregations.models import AggregationType
+from aggregations.utils.aggregation_handlers.fuzzy_choquet_integral import FuzzyChoquetIntegralAggregator
 from aggregations.utils.aggregation_handlers.qrf_dempster_extreme_expectations import \
     QRungFuzzyDempstersExtremeExpectations
 from aggregations.utils.aggregation_handlers.qrfowa import QRungFuzzyOrderedWeightedAverage
@@ -15,7 +16,7 @@ def aggregation_handler_factory(aggregation_type):
     elif aggregation_type == AggregationType.dempster_extreme_expectations:
         aggregator = QRungFuzzyDempstersExtremeExpectations
     elif aggregation_type == AggregationType.choquet_integral:
-        pass
+        aggregator = FuzzyChoquetIntegralAggregator
     elif aggregation_type == AggregationType.discrimination_analysis:
         pass
 
