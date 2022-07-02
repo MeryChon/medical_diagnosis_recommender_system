@@ -1,4 +1,6 @@
 from aggregations.models import AggregationType
+from aggregations.utils.aggregation_handlers.discrimination_analysis_aggregation import \
+    QRungFuzzyDiscriminationAnalysisAggregator
 from aggregations.utils.aggregation_handlers.fuzzy_choquet_integral import FuzzyChoquetIntegralAggregator
 from aggregations.utils.aggregation_handlers.qrf_dempster_extreme_expectations import \
     QRungFuzzyDempstersExtremeExpectations
@@ -18,7 +20,7 @@ def aggregation_handler_factory(aggregation_type):
     elif aggregation_type == AggregationType.choquet_integral:
         aggregator = FuzzyChoquetIntegralAggregator
     elif aggregation_type == AggregationType.discrimination_analysis:
-        pass
+        aggregator = QRungFuzzyDiscriminationAnalysisAggregator
 
     if not aggregator:
         raise Exception("Unknown aggregation type")
