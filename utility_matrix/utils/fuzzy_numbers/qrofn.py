@@ -49,6 +49,15 @@ class QROFN(FuzzyNumber):
         if q is not None and self.calculate_rung(m, n) > q:
             raise ValueError(f"{q} is not a valid rung for provided membership grades")
 
+    def to_dict(self):
+        return {
+            'm': self.m,
+            'n': self.n,
+            'q': self.q,
+            'score': self.score,
+            'accuracy': self.accuracy
+        }
+
     def __str__(self):
         return f"<{self.m}, {self.n}, {self.q}>"
 
@@ -83,7 +92,7 @@ class QROFN(FuzzyNumber):
         return product
 
     def multiply_by_const(self, c):
-        if c <= 0:
+        if c < 0:
             raise ValueError("Multiplication by non-positive scalar is not defined")
 
         if not isinstance(c, decimal.Decimal):

@@ -31,7 +31,7 @@ class DSBSHandler:
         pprint(generalized_expected_value)
 
     def _calculate_utility_collections_matrix(self):
-        generator = UtilityCollectionsMatrixGenerator(self.utility_matrix_json, self.focal_elements)
+        generator = UtilityCollectionsMatrixGenerator(self.utility_matrix_json)
         return generator.generate()
 
     def aggregate_collections(self, aggregation_type):
