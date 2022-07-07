@@ -24,7 +24,7 @@ class Symptom(models.Model):
 
 
 class FocalElement(models.Model):
-    name = models.CharField(null=False, blank=False, max_length=64)
+    name = models.CharField(null=False, blank=False, max_length=64, unique=True)
     symptoms = models.ManyToManyField(Symptom, related_name='focal_elements')
     bpa = models.DecimalField(null=False, decimal_places=3, max_digits=4)
 
