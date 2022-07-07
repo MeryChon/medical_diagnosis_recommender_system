@@ -26,9 +26,7 @@ class DSBSHandler:
     def run(self, aggregation_method: AggregationType):
         print(f"============== Running For {aggregation_method} ==============")
         aggregated_data = self.aggregate_collections(aggregation_method)
-        pprint(aggregated_data)
-        generalized_expected_value = self.calculate_generalized_expected_value(aggregated_data)
-        pprint(generalized_expected_value)
+        self.calculate_generalized_expected_value(aggregated_data)
 
     def _calculate_utility_collections_matrix(self):
         generator = UtilityCollectionsMatrixGenerator(self.utility_matrix_json)
