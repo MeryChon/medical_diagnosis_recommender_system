@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from aggregations.models import AggregationType
-from dempster_shafer_structure.utils.dsbs import DSBSHandler
+from dempster_shafer_structure.utils.factory import DSBSSingletonFactory
 from utility_matrix.models import UtilityMatrixData
 from utility_matrix.serializers import UtilityMatrixDataSerializer
 from utility_matrix.utils.fuzzy_numbers.serializers import OrderedAlternativeSerializer
@@ -79,32 +79,6 @@ WEIGHT_VECTORS = {
 }
 
 
-# WEIGHT_VECTORS = {
-#     'B1': {
-#         'Irritability': 0.6,
-#         'Lack of Appetite': 0.4,
-#     },
-#     'B2': {
-#         'Irritability': 0.7,
-#         'Lack of Appetite': 0.2,
-#         'Visual Hallucinations': 0.1,
-#     },
-#     'B3': {
-#         'Lack of Appetite': 0.4,
-#         'Difficulty Moving': 5,
-#     },
-#     'B4': {
-#         "Difficulty Moving": 0.3,
-#         "Visual Hallucinations": 0.1
-#     },
-#     'B5': {
-#         "Difficulty Moving": 0.4,
-#         "Visual Hallucinations": 0.1,
-#         "Auditory Hallucinations": 0.2
-#     }
-# }
-
-
 @api_view(['GET'])
 def get_dempster_shafer_structure_data(request):
     data = {
@@ -132,14 +106,16 @@ def run_decision_making_process(request):
     })
     serializer.is_valid(raise_exception=True)
     utility_matrix = serializer.save()  # type: UtilityMatrixData
-    print(utility_matrix.discrimination_qrang_matrix_json)
-
-    dsbs_handler = DSBSHandler(utility_matrix_data=utility_matrix,
-                               focal_elements=FOCAL_ELEMENTS,
-                               focal_element_weight_vectors=WEIGHT_VECTORS)
 
     results = {}
     for aggregation_type in AggregationType.choices:
+        aggregation_type = aggregation_type[0]
+        dsbs_handler = DSBSSingletonFactory.get_dsbs_handler(
+            aggregation_type,
+            utility_matrix_data=utility_matrix,
+            focal_elements=FOCAL_ELEMENTS,
+            focal_element_weight_vectors=WEIGHT_VECTORS
+        )
         dsbs_handler.run(aggregation_type)
         results[aggregation_type] = {
             "ordered_alternatives": OrderedAlternativeSerializer(dsbs_handler.ordered_alternatives,

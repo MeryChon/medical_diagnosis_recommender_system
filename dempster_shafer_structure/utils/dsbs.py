@@ -8,7 +8,10 @@ from utility_matrix.utils.utility_collections import UtilityCollectionsMatrixGen
 
 
 class DSBSHandler:
-    utility_matrix_json = None
+    q_rung_utility_matrix_json = None
+    initial_utility_matrix_json = None
+    q_rung_utility_collections_matrix = None
+    initial_utility_collections_matrix = None
     focal_elements = None
     aggregated_values = None
     generalized_expected_values = None
@@ -17,26 +20,28 @@ class DSBSHandler:
     optimal_alternative = None
 
     def __init__(self, utility_matrix_data: UtilityMatrixData, focal_elements, focal_element_weight_vectors=None):
-        self.utility_matrix_json = utility_matrix_data.discrimination_qrang_matrix_json
+        self.q_rung_utility_matrix_json = utility_matrix_data.discrimination_qrang_matrix_json
+        self.initial_utility_matrix_json = utility_matrix_data.expert_raw_data_json
         self.focal_elements = focal_elements
         self.focal_element_weight_vectors = focal_element_weight_vectors
         self.generalized_expected_values = {}
-        self.utility_collections_matrix = self._calculate_utility_collections_matrix()
+        self.calculate_utility_collections_matrices()
 
     def run(self, aggregation_method: AggregationType):
         print(f"============== Running For {aggregation_method} ==============")
         aggregated_data = self.aggregate_collections(aggregation_method)
         self.calculate_generalized_expected_value(aggregated_data)
 
-    def _calculate_utility_collections_matrix(self):
-        generator = UtilityCollectionsMatrixGenerator(self.utility_matrix_json)
-        return generator.generate()
+    def calculate_utility_collections_matrices(self):
+        generator = UtilityCollectionsMatrixGenerator(self.q_rung_utility_matrix_json)
+        self.q_rung_utility_collections_matrix = generator.generate()
 
     def aggregate_collections(self, aggregation_type):
         aggregation_class = aggregation_handler_factory(aggregation_type)
         if not aggregation_class:
             raise Exception("Aggregation class not found")
-        return aggregation_class(self.utility_collections_matrix, self.focal_element_weight_vectors).aggregate()
+
+        return aggregation_class(self.q_rung_utility_collections_matrix, self.focal_element_weight_vectors).aggregate()
 
     def calculate_generalized_expected_value(self, aggregated_values_matrix):
         for alternative_key, focal_elem_aggregated_payoffs in aggregated_values_matrix.items():
