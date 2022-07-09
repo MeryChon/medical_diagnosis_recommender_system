@@ -12,7 +12,7 @@ class UtilityCollectionsMatrixGenerator(object):
         self.utility_matrix = utility_matrix_json
         self._set_focal_elements()
 
-    def generate(self):
+    def generate(self, for_qrofn_matrix=True):
         utility_collections_matrix = {}
         for alternative_key, states_data in self.utility_matrix.items():
             alternative_collection = {}
@@ -20,10 +20,16 @@ class UtilityCollectionsMatrixGenerator(object):
                 symptoms = focal_element_model.symptoms.all()
                 for symptom in symptoms:
                     symptom_id = str(symptom.id)
-                    qrofn_dict = self.utility_matrix[alternative_key][symptom_id]
+                    utility_value = self.utility_matrix[alternative_key][symptom_id]
+                    if for_qrofn_matrix:
+                        utility_value = QROFN(
+                            m=utility_value.get('m'),
+                            n=utility_value.get('n'),
+                            q=utility_value.get('q')
+                        )
                     alternative_collection.setdefault(focal_element_key, []).append({
                         'id': symptom_id,
-                        'value': QROFN(m=qrofn_dict.get('m'), n=qrofn_dict.get('n'), q=qrofn_dict.get('q'))
+                        'value': utility_value
                     })
             utility_collections_matrix[alternative_key] = alternative_collection
 
