@@ -16,20 +16,21 @@ class SymptomSerializer(serializers.ModelSerializer):
 
 
 class FocalElementSerializer(serializers.ModelSerializer):
-    symptoms_with_weights = serializers.SerializerMethodField()
+    symptoms = serializers.SerializerMethodField()
+    bpa = serializers.FloatField()
 
     class Meta:
         model = FocalElement
-        fields = ('id', 'name', 'symptoms_with_weights', 'bpa')
+        fields = ('id', 'name', 'symptoms', 'bpa')
 
-    def get_symptoms_with_weights(self, instance):
+    def get_symptoms(self, instance):
         focal_element_symptom_weights = instance.symptom_weights.all()
         symptom_serializer = SymptomSerializer()
         serialized_data = []
         for fesw in focal_element_symptom_weights:
             symptom = fesw.symptom
             serialized_symptom = symptom_serializer.to_representation(symptom)
-            serialized_symptom['weight'] = fesw.weight
+            serialized_symptom['weight'] = float(fesw.weight)
             serialized_data.append(serialized_symptom)
 
         return serialized_data

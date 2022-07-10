@@ -83,10 +83,10 @@ class DiscriminationAnalysisHandler:
 
     @staticmethod
     def _default_large_ratio_function(ratio):
-        if ratio > 3:
+        if ratio > 5:
             return 1
 
         if ratio < 0.1:
             return 0
 
-        return round(0.34 * ratio - 0.034, 2)
+        return round(0.22 * ratio - 0.022, 2)

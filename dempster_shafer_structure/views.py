@@ -49,7 +49,10 @@ def run_decision_making_process(request):
     utility_matrix = serializer.save()  # type: UtilityMatrixData
 
     focal_elements = FocalElementSerializer(many=True).to_representation(FocalElement.objects.all())
-    weight_vectors = {fe.get('name'): [s.get('weight') for s in fe.get('symptoms')] for fe in focal_elements}
+    focal_elements_map = {fe.get('name'): fe for fe in focal_elements}
+    weight_vectors = {}
+    for fe in focal_elements:
+        weight_vectors[fe.get('name')] = {s.get('id'): s.get('weight') for s in fe.get('symptoms')}
 
     results = {}
     for aggregation_type in AggregationType.choices:
@@ -57,7 +60,7 @@ def run_decision_making_process(request):
         dsbs_handler = DSBSSingletonFactory.get_dsbs_handler(
             aggregation_type,
             utility_matrix_data=utility_matrix,
-            focal_elements=focal_elements,
+            focal_elements=focal_elements_map,
             focal_element_weight_vectors=weight_vectors
         )
         dsbs_handler.run(aggregation_type)
