@@ -1,94 +1,35 @@
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from aggregations.models import AggregationType
+from dempster_shafer_structure.models import Diagnose, Symptom, FocalElement
+from dempster_shafer_structure.serializers import DiagnoseSerializer, SymptomSerializer, FocalElementSerializer
 from dempster_shafer_structure.utils.factory import DSBSSingletonFactory
 from utility_matrix.models import UtilityMatrixData
 from utility_matrix.serializers import UtilityMatrixDataSerializer
 from utility_matrix.utils.fuzzy_numbers.serializers import OrderedAlternativeSerializer
 
-DIAGNOSES = [
-    {
-        "index": 0,
-        "name": "Depression"
-    },
-    {
-        "index": 1,
-        "name": "Bipolar Disorder"
-    },
-    {
-        "index": 2,
-        "name": "Autism Spectrum"
-    }
-]
 
-SYMPTOMS = [
-    {
-        "index": 0,
-        "name": "Irritability"
-    },
-    {
-        "index": 1,
-        "name": "Lack of Appetite"
-    },
-    {
-        "index": 2,
-        "name": "Difficulty Moving"
-    },
-    {
-        "index": 3,
-        "name": "Visual Hallucinations"
-    },
-    {
-        "index": 4,
-        "name": "Auditory Hallucinations"
-    }
-]
+class DempsterShaferBeliefStructureDataViewSet(APIView):
+    def get(self):
+        diagnoses = Diagnose.objects.all()
+        serialized_diagnoses = DiagnoseSerializer(many=True).to_representation(diagnoses)
 
-FOCAL_ELEMENTS = {
-    "B1": {
-        "symptoms": ["Irritability", "Lack of Appetite"],
-        "bpa": 0.1
-    },
-    "B2": {
-        "symptoms": ["Irritability", "Lack of Appetite", "Visual Hallucinations"],
-        "bpa": 0.2
-    },
-    "B3": {
-        "symptoms": ["Lack of Appetite", "Difficulty Moving"],
-        "bpa": 0.4
-    },
-    "B4": {
-        "symptoms": ["Difficulty Moving", "Visual Hallucinations"],
-        "bpa": 0.05
-    },
-    "B5": {
-        "symptoms": ["Difficulty Moving", "Visual Hallucinations", "Auditory Hallucinations"],
-        "bpa": 0.25
-    }
-}
+        symptoms = Symptom.objects.all()
+        serialized_symptoms = SymptomSerializer(many=True).to_representation(symptoms)
 
-# TODO weights should be arbitrary and normalization should be implemented
-WEIGHT_VECTORS = {
-    'B1': [0.6, 0.4],
-    'B2': [0.7, 0.2, 0.1],
-    'B3': [0.4, 0.5],
-    'B4': [0.3, 0.1],
-    'B5': [0.4, 0.1, 0.2],
-}
+        focal_elements = FocalElement.objects.all()
+        serialized_focal_elements = FocalElementSerializer(many=True).to_representation(focal_elements)
 
+        data = {
+            'diagnoses': serialized_diagnoses,
+            'symptoms': serialized_symptoms,
+            'focal_elements': serialized_focal_elements
+        }
 
-@api_view(['GET'])
-def get_dempster_shafer_structure_data(request):
-    data = {
-        'diagnoses': DIAGNOSES,
-        'symptoms': SYMPTOMS,
-        'focal_elements': FOCAL_ELEMENTS,
-        'weight_vectors': WEIGHT_VECTORS
-    }
-
-    return Response(status=200, data=data)
+        return Response(status=200, data=data)
 
 
 @api_view(['POST'])
@@ -107,14 +48,17 @@ def run_decision_making_process(request):
     serializer.is_valid(raise_exception=True)
     utility_matrix = serializer.save()  # type: UtilityMatrixData
 
+    focal_elements = FocalElementSerializer(many=True).to_representation(FocalElement.objects.all())
+    weight_vectors = {fe.get('name'): [s.get('weight') for s in fe.get('symptoms')] for fe in focal_elements}
+
     results = {}
     for aggregation_type in AggregationType.choices:
         aggregation_type = aggregation_type[0]
         dsbs_handler = DSBSSingletonFactory.get_dsbs_handler(
             aggregation_type,
             utility_matrix_data=utility_matrix,
-            focal_elements=FOCAL_ELEMENTS,
-            focal_element_weight_vectors=WEIGHT_VECTORS
+            focal_elements=focal_elements,
+            focal_element_weight_vectors=weight_vectors
         )
         dsbs_handler.run(aggregation_type)
         results[aggregation_type] = {

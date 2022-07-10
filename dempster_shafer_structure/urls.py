@@ -1,8 +1,9 @@
 from django.urls import path
 
-from dempster_shafer_structure.views import get_dempster_shafer_structure_data, run_decision_making_process
+from dempster_shafer_structure.views import run_decision_making_process, \
+    DempsterShaferBeliefStructureDataViewSet
 
 urlpatterns = [
-    path('structure/', get_dempster_shafer_structure_data),
+    path('structure/', DempsterShaferBeliefStructureDataViewSet.as_view()),
     path('run/', run_decision_making_process)
 ]
