@@ -26,6 +26,7 @@ class DiscriminationAnalysisDSBSHandler(DSBSHandler):
                                  self.focal_element_weight_vectors).aggregate()
 
     def calculate_generalized_expected_value(self, aggregated_values_matrix):
+        alternative_aggregations_map = {}
         for alternative_id, aggregated_collections in aggregated_values_matrix.items():
             gev_m = 0
             gev_n = 0
@@ -34,7 +35,28 @@ class DiscriminationAnalysisDSBSHandler(DSBSHandler):
                 gev_m += bpa * aggregated_value.get('weighted_positive_discrimination')
                 gev_n += bpa * aggregated_value.get('weighted_negative_discrimination')
 
-            generalized_expected_value = QROFN(gev_m, gev_n)
+            alternative_aggregations_map[alternative_id] = {
+                'm': gev_m,
+                'n': gev_n
+            }
+
+        max_m = 0
+        max_n = 0
+        for alternative_id, aggregated in alternative_aggregations_map.items():
+            if aggregated.get('m') > max_m:
+                max_m = aggregated.get('m')
+
+            if aggregated.get('n') > max_n:
+                max_n = aggregated.get('n')
+
+        normalized_aggregations_map = {}
+        for alternative_id, aggregated in alternative_aggregations_map.items():
+            normalized_aggregations_map[alternative_id] = {
+                'm': aggregated.get('m') / max_m,
+                'n': aggregated.get('n') / max_n
+            }
+        for alternative_id, aggregated in normalized_aggregations_map.items():
+            generalized_expected_value = QROFN(aggregated.get('m'), aggregated.get('n'))
             self.generalized_expected_values[alternative_id] = generalized_expected_value
 
         self.set_ordered_alternatives()

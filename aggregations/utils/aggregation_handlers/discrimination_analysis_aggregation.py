@@ -58,9 +58,6 @@ class QRungFuzzyDiscriminationAnalysisAggregator(AbstractAggregator):
         symptom_weights = self.focal_element_symptom_weights_map[focal_elem_key]
         collection_as_map = {i.get('id'): i.get('value') for i in collection}
 
-        weight_sum = sum(symptom_weights.values())
-        print(f"{focal_elem_key}: {weight_sum}")
-
         total = 0
 
         for index, item in collection_as_map.items():
