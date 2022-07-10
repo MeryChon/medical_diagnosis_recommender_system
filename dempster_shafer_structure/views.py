@@ -13,7 +13,7 @@ from utility_matrix.utils.fuzzy_numbers.serializers import OrderedAlternativeSer
 
 
 class DempsterShaferBeliefStructureDataViewSet(APIView):
-    def get(self):
+    def get(self, request):
         diagnoses = Diagnose.objects.all()
         serialized_diagnoses = DiagnoseSerializer(many=True).to_representation(diagnoses)
 
