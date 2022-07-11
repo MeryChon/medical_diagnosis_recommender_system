@@ -52,7 +52,7 @@ def run_decision_making_process(request):
     focal_elements_map = {fe.get('name'): fe for fe in focal_elements}
     weight_vectors = {}
     for fe in focal_elements:
-        weight_vectors[fe.get('name')] = {s.get('id'): s.get('weight') for s in fe.get('symptoms')}
+        weight_vectors[fe.get('name')] = {str(s.get('id')): s.get('weight') for s in fe.get('symptoms')}
 
     results = {}
     for aggregation_type in AggregationType.choices:

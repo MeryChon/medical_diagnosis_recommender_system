@@ -9,8 +9,10 @@ class QRungFuzzyWeightedAverage(AbstractAggregator):
             for focal_elem_key, collection in focal_collections.items():
                 aggregated_payoff = QROFN()
                 weight_vector = self.weight_vectors.get(focal_elem_key)
-                for index, weight in enumerate(weight_vector):
-                    product = collection[index].get('value').multiply_by_const(weight)
+                for item in collection:
+                    symptom_id = item.get('id')
+                    weight = weight_vector.get(symptom_id)
+                    product = item.get('value').multiply_by_const(weight)
                     aggregated_payoff += product
                 result.setdefault(alternative_key, {})[focal_elem_key] = aggregated_payoff
 
