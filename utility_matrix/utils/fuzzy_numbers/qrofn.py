@@ -134,7 +134,7 @@ class QROFN(FuzzyNumber):
         return decimal.Decimal(str(number))
 
     def calculate_score(self):
-        return self._m ** self._q + self._n ** self._q
+        return self._m ** self._q - self._n ** self._q
 
     def calculate_accuracy(self):
-        return self._m ** self._q - self._n ** self._q
+        return self._m ** self._q + self._n ** self._q
