@@ -43,6 +43,9 @@ class QROFN(FuzzyNumber):
         if m < 0 or m > 1 or n < 0 or n > 1:
             raise ValueError("Membership grades must be positive numbers from [0, 1] interval")
 
+        if m == 1 and n > 0 or n == 1 and m > 0:
+            raise ValueError("Rung cannot be calculated for such a pair")
+
         if q is not None and (not isinstance(q, int) or q < 0):
             raise ValueError("Rung must be a positive integer")
 

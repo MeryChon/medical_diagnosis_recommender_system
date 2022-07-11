@@ -51,9 +51,10 @@ class DiscriminationAnalysisDSBSHandler(DSBSHandler):
 
         normalized_aggregations_map = {}
         for alternative_id, aggregated in alternative_aggregations_map.items():
+            # FIXME multiplying by 0.75 is a measure to avoid getting m=1 and n=1 scenario
             normalized_aggregations_map[alternative_id] = {
-                'm': aggregated.get('m') / max_m,
-                'n': aggregated.get('n') / max_n
+                'm': aggregated.get('m') * 0.75 / max_m,
+                'n': aggregated.get('n') * 0.75 / max_n
             }
         for alternative_id, aggregated in normalized_aggregations_map.items():
             generalized_expected_value = QROFN(aggregated.get('m'), aggregated.get('n'))
