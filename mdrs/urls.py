@@ -15,14 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from utility_matrix.urls import urlpatterns as utility_matrix_urls
-from aggregations.urls import urlpatterns as aggregations_urls
+from rest_framework.authtoken import views
+
 from dempster_shafer_structure.urls import urlpatterns as ds_url_patterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
+    path('api-token-auth/', views.obtain_auth_token),
     path('dempster-shafer/', include(ds_url_patterns)),
-    path('utility-matrix/', include(utility_matrix_urls)),
-    path('aggregations/', include(aggregations_urls)),
 ]
